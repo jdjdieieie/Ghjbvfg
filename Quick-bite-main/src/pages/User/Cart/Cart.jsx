@@ -14,6 +14,7 @@ const Cart = () => {
 
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [stockStatus, setStockStatus] = useState({});
 
     useEffect(() => {
         loadCart();
@@ -24,11 +25,29 @@ const Cart = () => {
             const response = await api.get('/app2/api/v1/cart');
             setCartItems(response.data);
             setLoading(false);
+            checkStockStatus(response.data);
         } catch (error) {
             console.error('Error loading cart:', error);
             setCartItems([]);
             setLoading(false);
         }
+    };
+
+    const checkStockStatus = async (items) => {
+        const statusMap = {};
+        
+        for (const item of items) {
+            try {
+                const response = await api.get(`/app2/api/v1/food/find/instock?foodId=${item.foodId}`);
+                statusMap[item.foodId] = response.data.inStock === true;
+            } catch (error) {
+                console.error(`Error checking stock for food ${item.foodId}:`, error);
+                statusMap[item.foodId] = false;
+            }
+        }
+        console.log('Stock status map:', statusMap);
+        
+        setStockStatus(statusMap);
     };
 
     const handleRemoveFromCart = async (cartItemId, foodId) => {
@@ -66,6 +85,7 @@ const Cart = () => {
                             <p>Price</p>
                             <p>Quantity</p>
                             <p>Total</p>
+                            <p>Status</p>
                             <p>Remove</p>
                         </div>
                         <hr />
@@ -91,6 +111,15 @@ const Cart = () => {
                                             <span className="quantity-badge">{item.quantity}</span>
                                         </p>
                                         <p>&#8377;{item.totalPrice}</p>
+                                        <p className="stock-status">
+                                            {stockStatus[item.foodId] !== undefined ? (
+                                                <span className={`status-badge ${stockStatus[item.foodId] ? 'in-stock' : 'out-of-stock'}`}>
+                                                    {stockStatus[item.foodId] ? 'In Stock' : 'Out of Stock'}
+                                                </span>
+                                            ) : (
+                                                <span className="status-badge checking">Checking...</span>
+                                            )}
+                                        </p>
                                         <p className="cross" onClick={() => handleRemoveFromCart(item.id, item.foodId)}>x</p>
                                     </div>
                                     <hr />

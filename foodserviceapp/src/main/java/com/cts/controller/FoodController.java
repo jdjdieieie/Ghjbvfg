@@ -3,7 +3,9 @@ package com.cts.controller;
 import java.util.List;
 
 import com.cts.dto.request.FoodRequestDTO;
+import com.cts.dto.response.FoodInStockResponseDTO;
 import com.cts.dto.response.FoodResponseDTO;
+import com.cts.dto.response.RatingResponseDTO;
 import com.cts.repository.CartRepository;
 import com.cts.repository.FoodRepository;
 
@@ -120,6 +122,15 @@ public class FoodController {
     public ResponseEntity<FoodResponseDTO> updateFoodImageById(@RequestParam int id, @RequestParam String img) {
         FoodResponseDTO responseFood = foodService.updateFoodImage(id, img);
         return new ResponseEntity<>(responseFood, HttpStatus.OK);
+    }
+    
+    @GetMapping("find/instock")
+    @Operation(summary = "Get Whether Food is InStock or Not", description = "Returns the true if Food is InStock.")
+    public ResponseEntity<FoodInStockResponseDTO> isFoodInStock(@RequestParam int foodId) {
+    Boolean stock = foodService.isInStock(foodId);
+    	FoodInStockResponseDTO response=new FoodInStockResponseDTO();
+    	response.setInStock(stock);
+        return ResponseEntity.ok(response);
     }
 
 }

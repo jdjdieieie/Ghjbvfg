@@ -2,6 +2,7 @@ package com.cts.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.cts.dto.request.FoodRequestDTO;
 import com.cts.dto.response.FoodResponseDTO;
@@ -209,6 +210,11 @@ public class FoodServiceImpl implements FoodService {
 		return mapper.map(existingFood, FoodResponseDTO.class);
 	}
 
+	 public boolean isInStock(int foodId) {
+		 Food existingFood = repo.findById(foodId).orElseThrow(() -> new FoodNotFoundException("Food not found with id - " + foodId));
+	     boolean inStock = existingFood.isStatus();
+	     return inStock;
+	 }
 
 
 }

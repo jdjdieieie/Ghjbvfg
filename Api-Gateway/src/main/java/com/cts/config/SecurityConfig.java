@@ -42,6 +42,7 @@ public class SecurityConfig {
                 .pathMatchers(HttpMethod.GET, "/app2/api/v1/category").permitAll()
                 .pathMatchers(HttpMethod.GET, "/app2/api/v1/category/id").permitAll()
                 .pathMatchers(HttpMethod.GET, "/app2/api/v1/category/categoryName").permitAll()
+                .pathMatchers(HttpMethod.GET, "/app2/api/v1/food/find/instock").permitAll()
                 
              
                 .pathMatchers(HttpMethod.POST, "/app2/api/v1/food/register").hasRole("ADMIN")

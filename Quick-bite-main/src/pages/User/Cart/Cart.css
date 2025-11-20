@@ -24,7 +24,7 @@
 
 .cart-items-title.cart-items-item-header {
     display: grid;
-    grid-template-columns: 120px 2fr 1.2fr 1.2fr 1.2fr 100px;
+    grid-template-columns: 120px 2fr 1.2fr 1.2fr 1.2fr 1.2fr 100px;
     align-items: center;
     color: #666;
     font-size: max(1vw, 13px);
@@ -43,7 +43,7 @@
     margin: 15px 0px;
     color: #333;
     display: grid;
-    grid-template-columns: 120px 2fr 1.2fr 1.2fr 1.2fr 100px;
+    grid-template-columns: 120px 2fr 1.2fr 1.2fr 1.2fr 1.2fr 100px;
     align-items: center;
     font-size: max(1vw, 13px);
     position: relative;
@@ -311,4 +311,46 @@
         padding: 3px 10px;
         min-width: 30px;
     }
+
+    .cart-items-title.cart-items-item-header,
+    .cart-items-item {
+        grid-template-columns: 70px 1.4fr 0.8fr 0.8fr 0.8fr 0.8fr 60px;
+    }
+}
+
+/* Stock Status Badges */
+.stock-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+}
+
+.status-badge.in-stock {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+.status-badge.out-of-stock {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+}
+
+.status-badge.checking {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+    color: #333;
+    box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
 }
