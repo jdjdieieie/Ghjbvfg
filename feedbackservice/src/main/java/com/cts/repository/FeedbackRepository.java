@@ -14,10 +14,9 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Integer> {
     
     List<Feedback> findByFoodId(Integer foodId);
     
-    @Query("SELECT AVG(f.foodRating) FROM Feedback f WHERE f.food.id = :foodId")
+    @Query("SELECT AVG(f.foodRating) FROM Feedback f WHERE f.foodId = :foodId")
     Float findAverageRatingByFoodId(@Param("foodId") int foodId);
     
-    @Query("SELECT COUNT(f) > 0 FROM Feedback f WHERE f.orderId = :orderId AND f.customer = :customerId AND f.food.id = :foodId")
+    @Query("SELECT COUNT(f) > 0 FROM Feedback f WHERE f.orderId = :orderId AND f.customer = :customerId AND f.foodId = :foodId")
     boolean existsByOrderIdAndCustomerAndFoodId(@Param("orderId") int orderId, @Param("customerId") long customerId, @Param("foodId") int foodId);
-
 }

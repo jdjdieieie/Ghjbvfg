@@ -1,5 +1,7 @@
 package com.cts.service;
 
+import com.cts.client.AuthServiceClient;
+import com.cts.client.PromoCodeServiceClient;
 import com.cts.entity.Order;
 import com.cts.enums.OrderStatus;
 import com.cts.model.Customer;
@@ -16,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -44,6 +47,15 @@ public class CustomerOrderServiceTest {
     @Mock
     private AdminOrderService adminOrderService;
 
+    @Mock
+    private PromoCodeServiceClient promoCodeServiceClient;
+
+    @Mock
+    private AuthServiceClient authServiceClient;
+
+    @Mock
+    private ObjectMapper objectMapper;
+
     private CustomerOrderService customerOrderService;
 
     private Order order;
@@ -59,7 +71,9 @@ public class CustomerOrderServiceTest {
                 commonService,
                 mapper,
                 adminOrderService,
-                null);
+                promoCodeServiceClient,
+                authServiceClient,
+                objectMapper);
 
         customer = new Customer();
         customer.setId(1L);

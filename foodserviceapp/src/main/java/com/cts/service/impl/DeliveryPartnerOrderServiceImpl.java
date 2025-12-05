@@ -6,7 +6,6 @@ import com.cts.service.CommonOrderService;
 import com.cts.service.DeliveryPartnerOrderService;
 import lombok.AllArgsConstructor;
 import com.cts.client.AuthServiceClient;
-import com.cts.dto.*;
 import com.cts.dto.response.OrderPlacementResponseDTO;
 import com.cts.dto.response.OrderResponseDTO;
 import com.cts.enums.OrderStatus;
@@ -52,7 +51,7 @@ public class DeliveryPartnerOrderServiceImpl implements DeliveryPartnerOrderServ
         }
         order.setOrderStatus(OrderStatus.DELIVERED);
         Order savedOrder = orderRepository.save(order);
-        authServiceClient.updateDeliveryPartnerAvailability(order.getDeliveryPartner(), true);
+        authServiceClient.updateDeliveryPartnerAvailability(order.getDeliveryPartner(), true, true);
         authServiceClient.updateTotalOrders(order.getDeliveryPartner());
         authServiceClient.updateTotalOrders(order.getCustomer());
 

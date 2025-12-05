@@ -26,6 +26,10 @@ const AdminLayout = ({ children }) => {
             Menu Management
           </Link>
 
+          <Link to="/admin/promo-codes" className="nav-item">
+            Promo Codes
+          </Link>
+
           <Link to="/admin/view-orders" className="nav-item">
             View Orders
           </Link>

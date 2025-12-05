@@ -24,5 +24,6 @@ public interface FoodService {
     FoodResponseDTO updateFoodDescription(int id, String description);
     FoodResponseDTO updateFoodImage(int id, String img);
     boolean isInStock(int foodId);
+    void updateFoodRating(int id, float avgRating);
 
 }

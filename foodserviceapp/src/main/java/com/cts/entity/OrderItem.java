@@ -1,5 +1,7 @@
 package com.cts.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,13 +13,15 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 public class OrderItem {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id") 
+    @JoinColumn(name = "order_id")
+    @JsonBackReference
     private Order order; 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "food_id")

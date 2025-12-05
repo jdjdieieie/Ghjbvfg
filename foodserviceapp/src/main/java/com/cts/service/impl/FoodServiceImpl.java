@@ -216,5 +216,11 @@ public class FoodServiceImpl implements FoodService {
 	     return inStock;
 	 }
 
+	 public void updateFoodRating(int id, float avgRating) {
+		 Food existingFood = repo.findById(id)
+				 .orElseThrow(() -> new FoodNotFoundException("Food not found with id - " + id));
+		 existingFood.setAvgRating(avgRating);
+		 repo.save(existingFood);
+	 }
 
 }

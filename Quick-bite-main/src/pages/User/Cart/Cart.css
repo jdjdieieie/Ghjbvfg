@@ -191,35 +191,180 @@
 .cart-total button:active {
     transform: translateY(0);
 }
-.cart-promo-code {
-    flex: 1;
-}
-.cart-promo-code p {
-    color: #555;
-}
-.cart-promo-code-input {
+.promo-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     margin-top: 10px;
+    padding: 18px;
+    background: linear-gradient(140deg, #ffffff 0%, #f7f9fc 100%);
+    border-radius: 16px;
+    border: 1px dashed #cfd6e8;
+}
+
+.promo-section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #eaeaea;
-    border-radius: 4px;
+    gap: 12px;
 }
-.cart-promo-code-input input {
-    background: transparent;
-    border: none;
+
+.promo-section-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.promo-section-copy {
+    display: block;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.promo-status-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.12);
+    color: #047857;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.promo-input-row {
+    display: flex;
+    gap: 12px;
+}
+
+.promo-input {
+    flex: 1;
+    border-radius: 12px;
+    border: 1px solid #cbd5f5;
+    padding: 0.85rem 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #1f2937;
+    background: #fff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.promo-input:focus {
     outline: none;
-    padding-left: 15px;
-    width: 100%;
+    border-color: #111827;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.12);
 }
-.cart-promo-code-input button {
-    width: 150px;
-    padding: 12px 5px;
-    background-color: black;
-    color: white;
+
+.promo-input:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+.promo-action {
+    min-width: 120px;
     border: none;
-    border-radius: 4px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 1.2rem;
     cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.promo-action.primary {
+    background: #111111;
+    color: #ffffff;
+    box-shadow: 0 6px 15px rgba(17, 24, 39, 0.2);
+}
+
+.promo-action.secondary {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.promo-action:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.promo-action:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.18);
+}
+
+.promo-remove {
+    color: #dc3545;
+    font-weight: 700;
+    font-size: 20px;
+    margin-left: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 8px;
+}
+
+.promo-remove:hover {
+    color: #b91c1c;
+}
+
+.promo-remove:focus-visible {
+    outline: 2px solid #b91c1c;
+    outline-offset: 2px;
+}
+
+.promo-apply-cta {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 1rem 0;
+    margin-top: 12px;
+    background: #111111;
+    color: #ffffff;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.25);
+}
+
+.promo-apply-cta:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.promo-apply-cta:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px rgba(15, 23, 42, 0.3);
+}
+
+.promo-message {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.promo-message.success {
+    color: #047857;
+}
+
+.promo-message.error {
+    color: #b91c1c;
 }
 @media (max-width: 1024px) {
     .cart-container {

@@ -9,9 +9,12 @@ import com.cts.service.CustomerOrderService;
 import lombok.AllArgsConstructor;
 
 import com.cts.client.AuthServiceClient;
-import com.cts.dto.*;
+import com.cts.client.PromoCodeServiceClient;
 import com.cts.dto.request.OrderItemDTO;
 import com.cts.dto.request.OrderPlacementRequestDTO;
+import com.cts.dto.promo.PromoCodeRedeemRequestDTO;
+import com.cts.dto.promo.PromoCodeValidationRequestDTO;
+import com.cts.dto.promo.PromoCodeValidationResponseDTO;
 import com.cts.dto.response.OrderPlacementResponseDTO;
 import com.cts.dto.response.OrderResponseDTO;
 import com.cts.dto.response.UserResponseDTO;
@@ -20,14 +23,20 @@ import com.cts.exception.FoodNotFoundException;
 import com.cts.exception.FoodNotInStockException;
 import com.cts.exception.NoPartnerAvaliableException;
 import com.cts.exception.OrderCannotBeCancelException;
+import com.cts.exception.PromoCodeIntegrationException;
 import com.cts.exception.UnauthorizedActionException;
 import com.cts.model.Customer;
 import com.cts.model.User;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -38,6 +47,7 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class CustomerOrderServiceImpl implements CustomerOrderService{
+    private static final double DELIVERY_CHARGE = 30.0;
     
     private final OrdersRepository orderRepository;
     private final FoodRepository foodRepository;
@@ -46,7 +56,9 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
     private final CommonOrderService commonService;
     private final ModelMapper mapper;
     private final AdminOrderService adminOrderService;
-    private AuthServiceClient authServiceClient;
+    private final PromoCodeServiceClient promoCodeServiceClient;
+    private final AuthServiceClient authServiceClient;
+    private final ObjectMapper objectMapper;
 
 
 	@Transactional
@@ -69,6 +81,8 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
         order.setOrderDate(LocalDate.now());
         order.setOrderTime(LocalTime.now());
         order.setOrderStatus(OrderStatus.PENDING);
+        order.setDiscountAmount(0.0);
+        order.setPromoCode(null);
         
         
         
@@ -94,9 +108,12 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
             orderItems.add(orderItem);
         }
 
-        order.setTotalPrice(totalPrice);
+        double orderSubtotal = totalPrice;
+        double grandTotal = orderSubtotal + DELIVERY_CHARGE;
+        order.setTotalPrice(grandTotal);
         order.setTotalQty(totalQty);
         Order savedOrder = orderRepository.save(order);
+        final Order persistedOrder = savedOrder;
         
         OrderAddress orderAddress = new OrderAddress();
         orderAddress.setFirstName(request.getAddress().getFirstName());
@@ -108,11 +125,15 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
         orderAddress.setPhoneNo(request.getAddress().getPhoneNo());
         orderAddress.setOrder(savedOrder);
         orderAddressRepository.save(orderAddress);
-        
-       
-        orderItems.forEach(item -> item.setOrder(savedOrder));
+        orderItems.forEach(item -> item.setOrder(persistedOrder));
         orderItemRepository.saveAll(orderItems);
         
+        boolean promoApplied = false;
+        if (StringUtils.hasText(request.getPromoCode())) {
+            savedOrder = applyPromoCode(request.getPromoCode(), customer, orderSubtotal, savedOrder);
+            promoApplied = StringUtils.hasText(savedOrder.getPromoCode());
+        }
+
         
 
         ResponseEntity<List<UserResponseDTO>> response = authServiceClient.getActiveDeliveryPartners();
@@ -128,7 +149,11 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
             throw new NoPartnerAvaliableException("No available delivery partners at the moment. Please try again later.");
         }
     
-        adminOrderService.assignDeliveryPartner(order.getId(), CanBeAssignedpartnersList.get(0).getId());
+        adminOrderService.assignDeliveryPartner(savedOrder.getId(), CanBeAssignedpartnersList.get(0).getId());
+
+        if (promoApplied) {
+            finalizePromoUsage(savedOrder.getPromoCode(), customer, orderSubtotal, savedOrder);
+        }
 
         return mapper.map(savedOrder, OrderPlacementResponseDTO.class);
     }
@@ -155,7 +180,7 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
             order.setOrderStatus(OrderStatus.CANCELLED);
         }
         Order savedOrder = orderRepository.save(order);
-        authServiceClient.updateDeliveryPartnerAvailability(order.getDeliveryPartner(), true);
+        authServiceClient.updateDeliveryPartnerAvailability(order.getDeliveryPartner(), true, true);
         return mapper.map(savedOrder, OrderPlacementResponseDTO.class);
     }
  
@@ -184,5 +209,71 @@ public class CustomerOrderServiceImpl implements CustomerOrderService{
 
     private OrderResponseDTO mapToOrderResponseDto(Order order) {
         return commonService.mapToOrderResponseDto(order);
+    }
+
+    private Order applyPromoCode(String promoCode, User customer, double orderSubtotal, Order order) {
+        try {
+            PromoCodeValidationRequestDTO validationRequest = new PromoCodeValidationRequestDTO();
+            validationRequest.setCode(StringUtils.trimWhitespace(promoCode));
+            validationRequest.setCustomerId(customer.getId());
+            validationRequest.setCustomerEmail(customer.getEmail());
+            validationRequest.setOrderTotal(BigDecimal.valueOf(orderSubtotal));
+
+            PromoCodeValidationResponseDTO promoResponse = promoCodeServiceClient.validatePromo(validationRequest);
+
+            if (promoResponse == null || promoResponse.getFinalAmount() == null) {
+                throw new PromoCodeIntegrationException("Promo code service returned an invalid response");
+            }
+
+            order.setPromoCode(promoResponse.getCode());
+            order.setDiscountAmount(promoResponse.getDiscountAmount() != null
+                ? promoResponse.getDiscountAmount().doubleValue()
+                : 0.0);
+
+            double discountedItemsTotal = promoResponse.getFinalAmount().doubleValue();
+            double grandTotal = discountedItemsTotal + DELIVERY_CHARGE;
+            order.setTotalPrice(grandTotal);
+            return orderRepository.save(order);
+        } catch (FeignException ex) {
+            throw new PromoCodeIntegrationException(resolvePromoErrorMessage(ex));
+        } catch (Exception ex) {
+            throw new PromoCodeIntegrationException(ex.getMessage());
+        }
+    }
+
+    private void finalizePromoUsage(String promoCode, User customer, double orderSubtotal, Order order) {
+        try {
+            PromoCodeRedeemRequestDTO redeemRequest = new PromoCodeRedeemRequestDTO();
+            redeemRequest.setCode(StringUtils.trimWhitespace(promoCode));
+            redeemRequest.setCustomerId(customer.getId());
+            redeemRequest.setCustomerEmail(customer.getEmail());
+            redeemRequest.setOrderId(order.getId());
+            redeemRequest.setOrderTotal(BigDecimal.valueOf(orderSubtotal));
+            promoCodeServiceClient.redeemPromo(redeemRequest);
+        } catch (FeignException ex) {
+            throw new PromoCodeIntegrationException(resolvePromoErrorMessage(ex));
+        } catch (Exception ex) {
+            throw new PromoCodeIntegrationException(ex.getMessage());
+        }
+    }
+
+    private String resolvePromoErrorMessage(FeignException exception) {
+        String defaultMessage = "Unable to apply promo code. Please try again.";
+        String responseBody = exception.contentUTF8();
+        if (!StringUtils.hasText(responseBody)) {
+            return defaultMessage;
+        }
+        try {
+            JsonNode root = objectMapper.readTree(responseBody);
+            if (root.has("errorMessage")) {
+                return root.get("errorMessage").asText();
+            }
+            if (root.has("message")) {
+                return root.get("message").asText();
+            }
+        } catch (Exception ignored) {
+            return responseBody;
+        }
+        return responseBody;
     }
 }

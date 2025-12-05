@@ -140,15 +140,22 @@ public class UserServiceImpl implements UserService {
 		return modelMapper.map(updatedDeliveryPartner, RegisterDeliveryPartnerResponseDTO.class);
 	}
 	
-	public UserResponseDTO updateAvailabilityStatus(long id, Boolean available) {
+	public UserResponseDTO updateAvailabilityStatus(long id, Boolean available, boolean systemUpdate) {
 		User user = userRepo.findById(id)
 			.orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-	
 		if (!(user instanceof DeliveryPartner)) {
 			throw new IllegalArgumentException("Only delivery partners can have availability status");
 		}
-		
+		if (available == null) {
+			throw new IllegalArgumentException("Availability value cannot be null");
+		}
+		if (!systemUpdate && user.isAvailabilityLocked()) {
+			throw new IllegalStateException("Cannot change availability while an order is assigned");
+		}
 		user.setAvailabilityStatus(available);
+		if (systemUpdate) {
+			user.setAvailabilityLocked(!available);
+		}
 		User updatedUser = userRepo.save(user);
 		return modelMapper.map(updatedUser, UserResponseDTO.class);
 	}

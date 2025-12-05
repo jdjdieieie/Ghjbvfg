@@ -89,7 +89,7 @@ const MyOrders = () => {
             
             if (ratingStatusCache[cacheKey] !== undefined) {
                 return ratingStatusCache[cacheKey];
-            }            const response = await api.get(`/app2/api/v1/feedback/Rating/status/food?foodId=${foodId}&orderId=${orderId}&customerId=${customerId}`);
+            }            const response = await api.get(`/app3/api/v1/feedback/Rating/status/food?foodId=${foodId}&orderId=${orderId}&customerId=${customerId}`);
             
            
             let isRated = false;
@@ -117,7 +117,7 @@ const MyOrders = () => {
 
     const submitFoodRating = async (foodId, rating, orderId) => {
         try {
-            const response = await api.post(`/app2/api/v1/feedback/food/${foodId}`, {
+            const response = await api.post(`/app3/api/v1/feedback/food/${foodId}`, {
                 foodRating: parseInt(rating),
                 orderId: parseInt(orderId) 
             });

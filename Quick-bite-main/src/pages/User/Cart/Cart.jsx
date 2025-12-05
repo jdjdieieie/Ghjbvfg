@@ -15,6 +15,17 @@ const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [stockStatus, setStockStatus] = useState({});
+    const [promoCode, setPromoCode] = useState('');
+    const [promoState, setPromoState] = useState({
+        code: '',
+        discountType: null,
+        discountValue: null,
+        discountAmount: 0,
+        finalAmount: null,
+        message: '',
+        applied: false,
+        loading: false
+    });
 
     useEffect(() => {
         loadCart();
@@ -67,10 +78,64 @@ const Cart = () => {
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
     const deliverycharge = 30;
-    const finalTotal = totalPrice + deliverycharge;
+    const appliedDiscount = promoState.applied ? promoState.discountAmount : 0;
+    const finalTotal = Math.max(totalPrice + deliverycharge - appliedDiscount, 0);
+
+    const handleApplyPromo = async () => {
+        if (!promoCode.trim()) {
+            toast.error('Enter a promo code first');
+            return;
+        }
+        try {
+            setPromoState((prev) => ({ ...prev, loading: true }));
+            const payload = {
+                code: promoCode.trim(),
+                orderTotal: totalPrice,
+                customerId: JSON.parse(localStorage.getItem('currentUser') || '{}').id,
+                customerEmail: JSON.parse(localStorage.getItem('currentUser') || '{}').email,
+            };
+            const response = await api.post('/app4/api/v1/promocodes/validate', payload);
+            setPromoState({
+                code: response.data.code,
+                discountType: response.data.discountType,
+                discountValue: response.data.discountValue,
+                discountAmount: Number(response.data.discountAmount) || 0,
+                finalAmount: Number(response.data.finalAmount) || totalPrice,
+                message: response.data.message,
+                applied: true,
+                loading: false
+            });
+            toast.success('Promo code applied');
+        } catch (error) {
+            console.error('Promo validation failed', error);
+            setPromoState((prev) => ({ ...prev, applied: false, loading: false }));
+        }
+    };
+
+    const handleRemovePromo = () => {
+        setPromoCode('');
+        setPromoState({
+            code: '',
+            discountType: null,
+            discountValue: null,
+            discountAmount: 0,
+            finalAmount: null,
+            message: '',
+            applied: false,
+            loading: false
+        });
+    };
 
     const handleProceedToCheckout = () => {
-        navigate("/user/placeorder");
+        navigate("/user/placeorder", {
+            state: promoState.applied
+                ? {
+                      isPromocodeApplied: true,
+                      promocode: promoState.code,
+                      discountAmount: promoState.discountAmount,
+                  }
+                : undefined,
+        });
     };
 
     return (
@@ -141,12 +206,67 @@ const Cart = () => {
                                     <p>Delivery Charges</p>
                                     <p>₹{deliverycharge}</p>
                                 </div>
+                                {promoState.applied && (
+                                    <>
+                                        <hr />
+                                        <div className="cart-total-details">
+                                            <p>Promo Discount</p>
+                                            <p className="discount-amount">-₹{promoState.discountAmount.toFixed(2)}</p>
+                                        </div>
+                                    </>
+                                )}
                                 <hr />
                                 <div className="cart-total-details">
                                     <b>Total</b>
                                     <b>₹{finalTotal.toFixed(2)}</b>
                                 </div>
                             </div>
+                            <div className="promo-section">
+                                <div className="promo-section-header">
+                                    <div>
+                                        <p className="promo-section-title">Promo code</p>
+                                        <span className="promo-section-copy">Unlock extra savings on this order</span>
+                                    </div>
+                                    {promoState.applied && <span className="promo-status-pill">Applied</span>}
+                                </div>
+                                <div className="promo-input-row">
+                                    <input
+                                        className="promo-input"
+                                        type="text"
+                                        placeholder="Enter promo code"
+                                        value={promoCode}
+                                        onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                                        disabled={promoState.applied}
+                                    />
+                                    {promoState.applied && (
+                                        <span
+                                            role="button"
+                                            tabIndex={0}
+                                            className="promo-remove cross"
+                                            onClick={handleRemovePromo}
+                                            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleRemovePromo()}
+                                            aria-label="Remove promo code"
+                                        >
+                                            ×
+                                        </span>
+                                    )}
+                                </div>
+                                {promoState.message && (
+                                    <p className={`promo-message ${promoState.applied ? 'success' : 'error'}`}>
+                                        {promoState.message}
+                                    </p>
+                                )}
+                            </div>
+                            {!promoState.applied && (
+                                <button
+                                    type="button"
+                                    className="promo-apply-cta"
+                                    onClick={handleApplyPromo}
+                                    disabled={promoState.loading}
+                                >
+                                    {promoState.loading ? 'Applying…' : 'Apply'}
+                                </button>
+                            )}
                             <button onClick={handleProceedToCheckout}>PROCEED TO CHECKOUT</button>
                         </div>
                     </div>

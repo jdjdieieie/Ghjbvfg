@@ -123,12 +123,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(FeedbackAlreadyProvidedException.class)
-    public ResponseEntity<ErrorResponse> handleFeedbackAlreadyProvidedException(FeedbackAlreadyProvidedException ex) {
-        ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-    }
-
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
@@ -167,6 +161,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(OrderCannotBeCancelException.class)
     public ResponseEntity<ErrorResponse> handleOrderCannotBeCancelException(OrderCannotBeCancelException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PromoCodeIntegrationException.class)
+    public ResponseEntity<ErrorResponse> handlePromoCodeIntegrationException(PromoCodeIntegrationException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }

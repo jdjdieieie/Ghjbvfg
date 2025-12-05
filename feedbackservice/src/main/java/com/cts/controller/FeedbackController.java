@@ -3,7 +3,7 @@ package com.cts.controller;
 import com.cts.dto.request.FoodFeedbackRequestDTO;
 import com.cts.dto.response.FoodFeedbackResponseDTO;
 import com.cts.dto.response.RatingResponseDTO;
-import com.cts.entity.Order;
+import com.cts.model.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -30,6 +30,8 @@ public class User {
 	private boolean status = true;
 	@Column(name = "availability_status")
 	private Boolean availabilityStatus = true;
+	@Column(name = "availability_lock")
+	private boolean availabilityLocked = false;
 	@Column(name = "role", insertable = false, updatable = false)
 	private String role;
 	@Column(columnDefinition = "int default 0")

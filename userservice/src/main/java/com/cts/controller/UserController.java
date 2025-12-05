@@ -143,9 +143,10 @@ public class UserController {
     @PutMapping("/availability/{id}")
     public ResponseEntity<UserResponseDTO> updateAvailabilityStatus(
         @PathVariable long id,
-        @RequestParam Boolean available
+        @RequestParam Boolean available,
+        @RequestParam(name = "systemUpdate", defaultValue = "false") boolean systemUpdate
     ) {
-        UserResponseDTO updatedUser = userService.updateAvailabilityStatus(id, available);
+        UserResponseDTO updatedUser = userService.updateAvailabilityStatus(id, available, systemUpdate);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
     

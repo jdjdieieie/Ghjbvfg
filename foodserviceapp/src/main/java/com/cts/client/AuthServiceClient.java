@@ -37,7 +37,11 @@ public interface AuthServiceClient {
     ResponseEntity<List<UserResponseDTO>> searchDeliveryPartnersByName(@RequestParam("name") String name);
     
     @PutMapping("/api/v1/users/availability/{id}")
-    ResponseEntity<UserResponseDTO> updateDeliveryPartnerAvailability(@PathVariable("id") Long id, @RequestParam("available") Boolean available);
+    ResponseEntity<UserResponseDTO> updateDeliveryPartnerAvailability(
+        @PathVariable("id") Long id,
+        @RequestParam("available") Boolean available,
+        @RequestParam(value = "systemUpdate", defaultValue = "false") boolean systemUpdate
+    );
     
     @PutMapping("/api/v1/users/totalorder/update")
     ResponseEntity<UserResponseDTO> updateTotalOrders(@RequestParam("id") Long id);

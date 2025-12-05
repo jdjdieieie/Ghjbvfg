@@ -32,6 +32,7 @@ import ViewCustomers from './pages/Admin/ViewCustomers/ViewCustomers'
 import ViewDeliverypartners from './pages/Admin/ViewDeliverypartners/ViewDeliverypartners'
 import EditProducts from './pages/Admin/EditProducts/EditProducts'
 import AddCategory from './pages/Admin/AddCategory/AddCategory'
+import PromoCodes from './pages/Admin/PromoCodes/PromoCodes'
 
 const App = () => {
 
@@ -116,6 +117,11 @@ const App = () => {
         <Route path="/admin/view-delivery-partners" element={
           <ProtectedRoute allowedRoles={['admin']}>
             <ViewDeliverypartners />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/promo-codes" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <PromoCodes />
           </ProtectedRoute>
         } />
         <Route path="admin/edit-product" element={

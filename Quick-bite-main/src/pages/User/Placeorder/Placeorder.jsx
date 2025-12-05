@@ -24,9 +24,13 @@ const PlaceOrder = () => {
     const [loading, setLoading] = useState(true);
 
  
-    const discountPercentage = location.state?.discountPercentage || 0;
-    const isPromocodeApplied = location.state?.isPromocodeApplied || false;
-    const promocode = location.state?.promocode || '';
+    const promoState = location.state?.isPromocodeApplied
+        ? {
+              isPromocodeApplied: true,
+              code: location.state.promocode,
+              discountAmount: location.state.discountAmount || 0,
+          }
+        : { isPromocodeApplied: false };
 
     useEffect(() => {
         loadCartAndUser();
@@ -49,8 +53,8 @@ const PlaceOrder = () => {
     const totalPrice = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
     const deliverycharge = 30;
 
-    const discountAmount = (discountPercentage > 0 ? (discountPercentage / 100) * totalPrice : 0);
-    const finalTotal = totalPrice + deliverycharge - discountAmount;
+    const discountAmount = promoState.isPromocodeApplied ? promoState.discountAmount : 0;
+    const finalTotal = Math.max(totalPrice + deliverycharge - discountAmount, 0);
 
     const validateForm = () => {
         const newErrors = {};
@@ -129,7 +133,7 @@ const PlaceOrder = () => {
                     quantity: item.quantity
                 })),
                 
-                ...(isPromocodeApplied && promocode ? { promocode } : {})
+                ...(promoState.isPromocodeApplied && promoState.code ? { promoCode: promoState.code } : {})
             };
 
             const res = await api.post('/app2/api/v1/orders/place', orderData);
@@ -269,11 +273,11 @@ const PlaceOrder = () => {
                                 <p>Delivery Charges</p>
                                 <p>₹{deliverycharge}</p>
                             </div>
-                            {isPromocodeApplied && discountAmount > 0 && (
+                            {promoState.isPromocodeApplied && discountAmount > 0 && (
                                 <>
                                     <hr />
                                     <div className="cart-total-details discount-row">
-                                        <p>Discount ({discountPercentage}%)</p>
+                                        <p>Promo Discount</p>
                                         <p className="discount-amount">-₹{discountAmount.toFixed(2)}</p>
                                     </div>
                                 </>

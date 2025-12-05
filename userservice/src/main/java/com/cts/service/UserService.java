@@ -13,7 +13,7 @@ public interface UserService {
 	public String deleteUser(long id);
 	public RegisterCustomerResponseDTO updateCustomer(RegisterCustomerRequestDTO registerRequestDTO);
 	public RegisterDeliveryPartnerResponseDTO updateDeliveryPartner(RegisterDeliveryPartnerRequestDTO dp);
-	public UserResponseDTO updateAvailabilityStatus(long id, Boolean available);
+	public UserResponseDTO updateAvailabilityStatus(long id, Boolean available, boolean systemUpdate);
 	public UserResponseDTO updateUserStatus(long id, boolean status);
 	public List<UserResponseDTO> searchActiveDeliveryPartnersByName(String name);
 	public List<UserResponseDTO> searchActiveCustomersByName(String name);

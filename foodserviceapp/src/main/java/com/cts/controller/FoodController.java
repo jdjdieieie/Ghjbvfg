@@ -133,4 +133,11 @@ public class FoodController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{id}/rating")
+    @Operation(summary = "Update food average rating", description = "Used by Feedback service to persist average rating")
+    public ResponseEntity<Void> updateFoodRating(@PathVariable int id, @RequestParam float avgRating) {
+        foodService.updateFoodRating(id, avgRating);
+        return ResponseEntity.ok().build();
+    }
+
 }

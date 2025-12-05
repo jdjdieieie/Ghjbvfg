@@ -5,7 +5,7 @@ import com.cts.dto.request.CartRequestDTO;
 import com.cts.dto.response.CartResponseDTO;
 import com.cts.entity.Cart;
 import com.cts.entity.Food;
-import com.cts.exception.ResourceNotFoundException;
+import com.cts.exception.FoodNotFoundException;
 import com.cts.repository.CartRepository;
 import com.cts.repository.FoodRepository;
 import com.cts.service.impl.CartServiceImpl;
@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -72,7 +73,7 @@ public class CartServiceImplTest {
 
         when(userService.getUserById(1L)).thenReturn(user);
         when(foodRepository.findById(101)).thenReturn(Optional.of(food));
-        when(cartRepository.findByUserIdAndFoodId(1L, 101)).thenReturn(Optional.empty());
+        when(cartRepository.findAllByUserIdAndFoodId(1L, 101)).thenReturn(Collections.emptyList());
         when(cartRepository.save(any(Cart.class))).thenReturn(cart);
 
         CartResponseDTO result = cartService.addToCart(1L, cartRequestDTO);
@@ -96,7 +97,7 @@ public class CartServiceImplTest {
         when(userService.getUserById(1L)).thenReturn(user);
         when(foodRepository.findById(999)).thenReturn(Optional.empty());
 
-        assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(FoodNotFoundException.class, () -> {
             cartService.addToCart(1L, invalidRequest);
         });
     }

@@ -1,0 +1,12 @@
+{
+    "java.project.sourcePaths": [
+        "feedbackservice/src/main/java",
+        "foodserviceapp/src/main/java",
+        "userservice/src/main/java",
+        "Api-Gateway/src/main/java",
+        "Eureka/src/main/java"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "maven.view": "hierarchical",
+    "java.compile.nullAnalysis.mode": "automatic"
+}

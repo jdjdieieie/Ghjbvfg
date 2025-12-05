@@ -12,6 +12,7 @@ public class UserResponseDTO {
     private String location;
     private String role;
     private Boolean availabilityStatus;
+    private boolean availabilityLocked;
     private int totalOrders;
     
 }

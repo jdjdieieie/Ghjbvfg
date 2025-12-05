@@ -77,7 +77,7 @@ public class CommonOrderServiceTest {
     void getOrderById_NotFound() {
         when(orderRepository.findById(999)).thenReturn(Optional.empty());
 
-        assertThrows(com.cts.exception.ResourceNotFoundException.class, () -> {
+        assertThrows(com.cts.exception.OrderNotFoundException.class, () -> {
             commonOrderService.getOrderById(999);
         });
     }

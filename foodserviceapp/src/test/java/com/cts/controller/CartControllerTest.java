@@ -3,7 +3,7 @@ package com.cts.controller;
 
 import com.cts.dto.request.CartRequestDTO;
 import com.cts.dto.response.CartResponseDTO;
-import com.cts.exception.ResourceNotFoundException;
+import com.cts.exception.UserNotFoundException;
 import com.cts.model.User;
 import com.cts.service.CartService;
 import com.cts.service.UserService;
@@ -80,7 +80,7 @@ public class CartControllerTest {
         when(authentication.getName()).thenReturn("invalid@example.com");
         when(userService.getUserByEmail("invalid@example.com")).thenReturn(null);
 
-        assertThrows(ResourceNotFoundException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             cartController.addToCart(cartRequestDTO, authentication);
         });
     }

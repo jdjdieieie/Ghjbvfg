@@ -15,10 +15,10 @@ import com.cts.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,13 +57,13 @@ public class CartServiceImpl implements CartService {
             throw new FoodNotInStockException("Food item is not available");
         }
 
-        Optional<Cart> existingCart = cartRepository.findByUserIdAndFoodId(userId, cartRequestDto.getFoodId());
+        List<Cart> existingCarts = cartRepository.findAllByUserIdAndFoodId(userId, cartRequestDto.getFoodId());
         
         Cart cart;
-        if (existingCart.isPresent()) {
+        if (!existingCarts.isEmpty()) {
             System.out.println("Updating existing cart item");
 
-            cart = existingCart.get();
+            cart = normalizeDuplicateCartEntries(existingCarts);
             cart.setQuantity(cart.getQuantity() + cartRequestDto.getQuantity());
         } else {
             System.out.println("Creating new cart item");
@@ -82,8 +82,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponseDTO updateQuantity(Long userId, int foodId, int quantity) {
-        Cart cart = cartRepository.findByUserIdAndFoodId(userId, foodId)
-                .orElseThrow(() -> new CartItemNotFoundException("Cart item not found"));
+        Cart cart = getCartOrThrow(userId, foodId);
         
         if (quantity <= 0) {
             throw new IllegalArgumentException("Quantity must be greater than 0");
@@ -97,8 +96,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void removeFromCart(Long userId, int foodId) {
-        Cart cart = cartRepository.findByUserIdAndFoodId(userId, foodId)
-                .orElseThrow(() -> new CartItemNotFoundException("Cart item not found"));
+        Cart cart = getCartOrThrow(userId, foodId);
         
         cartRepository.delete(cart);
     }
@@ -149,5 +147,32 @@ public class CartServiceImpl implements CartService {
         dto.setTotalPrice(cart.getFood().getPrice() * cart.getQuantity());
         dto.setCreatedAt(cart.getCreatedAt());
         return dto;
+    }
+
+    private Cart getCartOrThrow(Long userId, int foodId) {
+        List<Cart> carts = cartRepository.findAllByUserIdAndFoodId(userId, foodId);
+        if (carts.isEmpty()) {
+            throw new CartItemNotFoundException("Cart item not found");
+        }
+        return normalizeDuplicateCartEntries(carts);
+    }
+
+    private Cart normalizeDuplicateCartEntries(List<Cart> carts) {
+        Cart primary = carts.get(0);
+        if (carts.size() == 1) {
+            return primary;
+        }
+        int combinedQuantity = primary.getQuantity();
+        List<Cart> duplicates = new ArrayList<>();
+        for (int i = 1; i < carts.size(); i++) {
+            Cart duplicate = carts.get(i);
+            combinedQuantity += duplicate.getQuantity();
+            duplicates.add(duplicate);
+        }
+        if (!duplicates.isEmpty()) {
+            cartRepository.deleteAll(duplicates);
+        }
+        primary.setQuantity(combinedQuantity);
+        return cartRepository.save(primary);
     }
 }

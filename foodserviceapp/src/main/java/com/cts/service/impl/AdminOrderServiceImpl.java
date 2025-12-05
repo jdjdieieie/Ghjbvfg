@@ -6,7 +6,6 @@ import com.cts.service.AdminOrderService;
 import com.cts.service.CommonOrderService;
 import lombok.AllArgsConstructor;
 import com.cts.client.AuthServiceClient;
-import com.cts.dto.*;
 import com.cts.dto.response.OrderPlacementResponseDTO;
 import com.cts.dto.response.OrderResponseDTO;
 import com.cts.enums.OrderStatus;
@@ -54,7 +53,7 @@ public class AdminOrderServiceImpl implements AdminOrderService {
         order.setDeliveryPartner(partnerId);
        
         Order savedOrder = orderRepository.save(order);
-        authServiceClient.updateDeliveryPartnerAvailability(partnerId, false);
+        authServiceClient.updateDeliveryPartnerAvailability(partnerId, false, true);
         return mapper.map(savedOrder, OrderPlacementResponseDTO.class);
     }
     
